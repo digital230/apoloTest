@@ -1,0 +1,17 @@
+type Query {
+  users(all: Boolean!): [User]!
+}
+
+type User {
+  name: String!
+}
+
+type result {
+  success: Boolean!
+  msg: String!
+}
+
+
+type Mutation {
+  insert(name: String!): result
+}

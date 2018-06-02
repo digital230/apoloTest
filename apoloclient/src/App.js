@@ -14,6 +14,15 @@ const Query = gql`
   }
 `;
 
+const Insert = gql `
+  mutation insert($name: String!) {
+    insert(name: $name) {
+      success
+      msg
+    }
+  }
+`;
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -21,18 +30,16 @@ class App extends Component {
     this.state = {};
   }
 
-  async componentDidMount() {
-    const {client} = this.props;
+  componentDidMount() {
 
-    const res=  await client.query({
-      query: Query,
-      variables: {currency: 'USD'},
+  }
+
+  async submit() {
+    const {name} = this.state;
+    const res = await this.props.client.mutate({
+      mutation: Insert,
+      variables: {name}
     });
-
-    let {data: {rates}} = res;
-
-    this.setState({rates});
-
     console.log(res)
   }
 
@@ -47,10 +54,8 @@ class App extends Component {
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
-        {rates.map((r, i) => {
-          return <p key={i}>{`currency: ${r.currency}, rate: ${r.rate}`}</p>
-        })}
-
+        <input type="text" onChange={(e) => this.setState({name: e.target.value})} />
+        <button onClick={() => this.submit()}>Insert</button>
       </div>
     );
   }
