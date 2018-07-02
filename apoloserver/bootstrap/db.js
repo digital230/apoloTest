@@ -10,7 +10,7 @@ export default () => {
     console.log('db connected');
     const schema = makeExecutableSchema({
       typeDefs,
-      resolver: resolvers(db)
+      resolvers: resolvers(db)
     });
 
     return {

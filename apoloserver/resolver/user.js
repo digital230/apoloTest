@@ -1,19 +1,17 @@
 export default (db) => {
-  const User = db.collections('users');
+  const User = db.collection('users');
 
   try {
     return {
       Query: {
-        users: async (root, {all}) => {
-          let users = User.find({}).toArray();
-          return users;
+        allUsers: async (root, args) => {
+          let users = await User.find({}).toArray();
+          return {success: true, data: users}
         }
       },
       Mutation: {
-        insert: async (root, {name}) => {
-          console.log(name)
+        insertUser: async (root, {name}) => {
           let user = await User.insert({name});
-          console.log(user);
           return {success: true, msg: 'user created'}
         }
       }

@@ -1,9 +1,15 @@
 type Query {
-  users(all: Boolean!): [User]!
+  allUsers(all: Boolean!): defaultRes!
+}
+
+type defaultRes {
+  success: Boolean!
+  data: [User]!
 }
 
 type User {
-  name: String!
+  _id: ID!
+  name: String
 }
 
 type result {
@@ -13,5 +19,5 @@ type result {
 
 
 type Mutation {
-  insert(name: String!): result
+  insertUser(name: String!): result!
 }

@@ -9,44 +9,58 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var debug = require('debug')('apoloserver:server');
 var http = require('http');
+import {MongoClient} from 'mongodb';
+
+import cors from 'cors';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
-import db from './bootstrap/db.js';
+import { makeExecutableSchema } from 'graphql-tools';
+import typeDefs from './schema';
+import resolvers from './resolver';
 
-var app = express();
-var port = process.env.PORT || 4000;
+
+const app = express();
+const port = process.env.PORT || 4000;
 app.set('port', port);
-var server = http.createServer(app);
+const server = http.createServer(app);
 
-app.all('/*', function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  // if (req.method === "OPTIONS") res.send({ response: 'I am alive' }).status(200);
-  next();
-});
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors());
 
-db().then((database, schema) => {
-  try {
-    app.use('/graphql', graphqlExpress((req) => {
+MongoClient.connect(process.env.MONGO_URL)
+  .then((database) => {
+    const db = database.db('apolo');
+    console.log('db connected');
+    // db.collection('users').insert({name: 'omer'}, function(err, res) {
+    //   if(err) console.log(err);
+    //   console.log(res)
+    // })
+    db.collection('users').find({}).toArray().then((u) => {
+      console.log(u)
+    })
+    const schema = makeExecutableSchema({
+      typeDefs,
+      resolvers: resolvers(db)
+    });
+
+    app.use('/graphql',bodyParser.json(), graphqlExpress((req) => {
       console.log(req.body)
-      return {
-        schema, context: {decoded: req.decoded}
-      }
+      let obj = {
+        schema,
+        tracing: true,
+      };
+      return obj;
     }));
+
     app.use('/graphiql', graphiqlExpress({
       endpointURL: '/graphql'
     }));
-  } catch (e) {
-    console.lo(e)
-  }
-})
-.catch(err => console.log(err))
+  })
+  .catch(err => console.log(err, 'error database'))
 
-app.use(require('./routes/index'));
-app.use(require('./routes/users'));
+// app.use(require('./routes/index'));
+// app.use(require('./routes/users'));
 
 server.listen(port, () => console.log('server listning on', port));

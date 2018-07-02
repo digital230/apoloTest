@@ -1,5 +1,7 @@
+import { combineResolvers } from 'apollo-resolvers';
 import user from './user';
 
-export default (db) => {
-  user(db)
-}
+export default (db) => combineResolvers([
+  user(db),
+]);
+

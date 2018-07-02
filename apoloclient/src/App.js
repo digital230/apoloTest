@@ -5,20 +5,22 @@ import gql from "graphql-tag";
 import './App.css';
 
 
-const Query = gql`
-  query rates($currency: String!) {
-    rates(currency: $currency) {
-      currency
-      rate
+const Insert = gql `
+  mutation insertUser($name: String!) {
+    insertUser(name: $name) {
+      success
+      msg
     }
   }
 `;
 
-const Insert = gql `
-  mutation insert($name: String!) {
-    insert(name: $name) {
+const Users = gql`
+  query allUsers($all: Boolean!) {
+    allUsers(all: $all) {
       success
-      msg
+      data {
+        name
+      }
     }
   }
 `;
@@ -30,8 +32,16 @@ class App extends Component {
     this.state = {};
   }
 
-  componentDidMount() {
-
+  async componentDidMount() {
+    try {
+      const res = await this.props.client.query({
+        query: Users,
+        variables: {all: true}
+      });
+      console.log(res)
+    } catch (e){
+      console.log(e)
+    }
   }
 
   async submit() {
